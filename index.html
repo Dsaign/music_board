@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Music Board</title>
+	<style type="text/css">
+		html, body {
+			height: 100vh;
+			background-color: black;
+			overflow: hidden;
+			font-family: "Noto Sans", sans-serif;
+		}
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+		#music_board{
+			width: 100vw;
+			height: 100vh;
+		}
+		canvas {
+			height: 100vh;
+			width: 100vw;
+			position: relative;
+			z-index: 9;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="music_board"></canvas>
+
+	<script type="text/javascript">
+		const music_board = document.querySelector("#music_board"),
+		board = music_board.getContext("2d");
+
+		const audio = new Audio('https://drive.google.com/file/d/1CCtSmizoMVeYLOSQaDik2VYtlctXBWfq/view');
+
+		audio.volume = 0.02;
+		audio.play();
+
+		let startTime = new Date().getTime();
+		const strokeColor = "#546fdc";
+
+		const draw = () => {
+
+			const currentTime = new Date().getTime(),
+				  elapsedTime = (currentTime - startTime) / 1000;
+
+			music_board.width = music_board.clientWidth;
+			music_board.height = music_board.clientHeight;
+
+			const start = {
+				x: music_board.width * 0.1,
+				y: music_board.height * 0.5
+			}
+			const end = {
+				x: music_board.width * 0.9,
+				y: music_board.height * 0.5
+			}
+			const center = {
+				x: music_board.width * 0.5,
+				y: music_board.height * 0.5
+			}
+
+			const length = end.x - start.x;
+			const velocity = 0.5;
+			const arcRadius = length * 0.05,
+				  distance = Math.PI + (elapsedTime * velocity);
+
+			const x = center.x + arcRadius * Math.cos(distance),
+				  y = center.y + arcRadius * Math.sin(distance);
+
+			// properties of board
+			board.strokeStyle = strokeColor;
+			board.lineWidth = 2;
+
+			// draw horizontal line
+			board.beginPath();
+			board.moveTo(start.x, start.y);
+			board.lineTo(end.x, end.y);
+			board.stroke();
+
+			// draw circle
+			// board.beginPath();
+			// board.arc(center.x, center.y, length * ((music_board.width)*10), Math.PI, Math.PI * 2);
+			// // for(let i = 1; i < 10; i++){
+			// //   board.arc(center.x, center.y, length * ((i/music_board.width)*10), Math.PI, Math.PI * 2);
+			// // }
+			// board.stroke();
+
+			const colors = Array(21).fill(strokeColor),
+				  initialArcRadius = length * 0.05;
+			let arcs = colors.map((color, index) => {
+				// const velocity = calculateVelocity(index) ;
+				return {
+					color
+				}
+			});
+
+			arcs.forEach((arc, index) => {
+				const spacing = (length / 2 - initialArcRadius) / arcs.length;
+				const arcRadius = initialArcRadius + (index * spacing); 
+
+				board.beginPath();
+				board.arc(center.x, center.y, arcRadius, 0, 2 * Math.PI);
+				board.strokeStyle = arc.color;
+				board.stroke();
+			});
+
+			// draw point
+			// board.fillStyle = "white";
+			// board.beginPath();
+			// board.arc(x, y, length * 0.0065, 0, 2 * Math.PI);
+			// board.fill();
+			// board.stroke();
+
+			requestAnimationFrame(draw);
+
+		}
+
+		draw();
+	</script>
+</body>
+</html>
