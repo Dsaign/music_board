@@ -35,10 +35,7 @@
 		const music_board = document.querySelector("#music_board"),
 		board = music_board.getContext("2d");
 
-		const audio = new Audio('/assets/music.mp3');
-
-		audio.volume = 0.02;
-		audio.play();
+		var audio = new Audio('https://github.com/Dsaign/music_board/raw/main/assets/music.mp3');
 
 		let startTime = new Date().getTime();
 		const strokeColor = "#546fdc";
@@ -120,7 +117,11 @@
 
 		}
 
+		audio.volume = 0.02;
+		audio.play();
+		
 		draw();
+
 	</script>
 </body>
 </html>
