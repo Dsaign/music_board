@@ -36,6 +36,7 @@
 		board = music_board.getContext("2d");
 
 		var audio = new Audio('https://github.com/Dsaign/music_board/raw/main/assets/music.mp3');
+		audio.volume = 0.2;
 
 		let startTime = new Date().getTime();
 		const strokeColor = "#546fdc";
@@ -116,11 +117,12 @@
 			requestAnimationFrame(draw);
 
 		}
-
-		audio.volume = 0.02;
-		audio.play();
 		
 		draw();
+
+		document.body.addEventListener("load", function () {
+		    audio.play();
+		})
 
 	</script>
 </body>
