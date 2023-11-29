@@ -26,103 +26,201 @@
 			position: relative;
 			z-index: 9;
 		}
+		.toggle {
+			background-color: rgb(255 255 255 / 10%);
+			backdrop-filter: blur(5px);
+			padding: 0.5rem;
+			border-radius: 0.25rem;
+			height: 2rem;
+			border: none;
+			outline: none;
+			cursor: pointer;
+		}
+		.toggle:is(:hover, :focus-visible) {
+			background-color: rgb(255 255 255 / 15%);
+		}
+		.toggle > i {
+			color: white;
+			display: none;
+			height: 1rem;
+			width: 1rem;
+			font-size: 0.6rem;
+			line-height: 1rem;
+			text-align: center;
+		}
+		.toggle[data-toggled="true"] > i.on {
+			display: block;
+		}
+
+		.toggle[data-toggled="false"] > i.off {
+			display: block;
+		}
+
+		#sound-message {
+			position: fixed;
+			top: 36%;
+			left: 50%;
+			translate: -50% -50%;
+			z-index: 3;
+			padding: 0.75rem;
+			background-color: rgb(255 255 255 / 5%);
+			border-radius: 0.4rem;
+			transition: opacity 1000ms;
+			pointer-events: none;
+		}
+
+		body:has(#sound-toggle[data-toggled="true"]) #sound-message {
+			opacity: 0;
+		}
+
+		#sound-message > p {
+			color: white;
+			font-size: 0.9rem;
+			white-space: nowrap;
+		}
 	</style>
 </head>
 <body>
+
+	<button id="sound-toggle" class="toggle" type="button" data-toggled="false" onClick="handleSoundToggle()" title="Toggle Pulse">
+		<i class="fa-solid fa-music-slash off"></i>
+		<i class="fa-solid fa-music on"></i>
+    </button>
+    <div id="sound-message">
+		<p>Click anywhere to toggle sound</p>
+	</div>
+
 	<canvas id="music_board"></canvas>
 
 	<script type="text/javascript">
 		const music_board = document.querySelector("#music_board"),
-		board = music_board.getContext("2d");
+		      board = music_board.getContext("2d"),
+		      strokeColor = "#546fdc";
+
+		let startTime = new Date().getTime();
+
+		const colors = Array(21).fill(strokeColor);
+
+		let arcs = colors.map((color, index) => {
+		    return {
+		        color
+		    }
+		});
 
 		var audio = new Audio('https://github.com/Dsaign/music_board/raw/main/assets/music.mp3');
 		audio.volume = 0.2;
 
-		let startTime = new Date().getTime();
-		const strokeColor = "#546fdc";
+		// const playKey = audio.play();
+
+		const get = selector => document.querySelector(selector);
+
+		const toggles = {
+		    sound: get("#sound-toggle")
+		}
+
+		const settings = {
+		    soundEnabled: false, // User still must interact with screen first
+		    pulseEnabled: true // Pulse will only show if sound is enabled as well
+		}
+
+		const handleSoundToggle = (enabled = !settings.soundEnabled) => {
+		    settings.soundEnabled = enabled;
+		    toggles.sound.dataset.toggled = enabled;
+		    enabled ? audio.play() : audio.pause();
+		}
+
+		document.onvisibilitychange = () => handleSoundToggle(false);
+
+		music_board.onclick = () => handleSoundToggle();
+
+		const calculateDynamicOpacity = (currentTime, lastImpactTime, baseOpacity, maxOpacity, duration) => {
+		    const timeSinceImpact = currentTime - lastImpactTime,
+		          percentage = Math.min(timeSinceImpact / duration, 1),
+		          opacityDelta = maxOpacity - baseOpacity;
+
+		    return maxOpacity - (opacityDelta * percentage);
+		}
+
+		const determineOpacity = (currentTime, lastImpactTime, baseOpacity, maxOpacity, duration) => {
+		    if (!settings.pulseEnabled) return baseOpacity;
+		    return calculateDynamicOpacity(currentTime, lastImpactTime, baseOpacity, maxOpacity, duration);
+		}
+
+		const drawArc = (x, y, radius, start, end, action = "stroke") => {
+		    board.beginPath();
+		    board.arc(x, y, radius, start, end);
+		    if (action === "stroke") board.stroke();
+		    else board.fill();
+		}
 
 		const draw = () => {
 
-			const currentTime = new Date().getTime(),
-				  elapsedTime = (currentTime - startTime) / 1000;
+		    music_board.width = music_board.clientWidth;
+		    music_board.height = music_board.clientHeight;
 
-			music_board.width = music_board.clientWidth;
-			music_board.height = music_board.clientHeight;
+		    const currentTime = new Date().getTime(),
+		        elapsedTime = (currentTime - settings.startTime) / 1000;
 
-			const start = {
-				x: music_board.width * 0.1,
-				y: music_board.height * 0.5
-			}
-			const end = {
-				x: music_board.width * 0.9,
-				y: music_board.height * 0.5
-			}
-			const center = {
-				x: music_board.width * 0.5,
-				y: music_board.height * 0.5
-			}
+		    const length = Math.min(music_board.width, music_board.height) * 0.9,
+		        offset = (music_board.width - length) / 2;
 
-			const length = end.x - start.x;
-			const velocity = 0.5;
-			const arcRadius = length * 0.05,
-				  distance = Math.PI + (elapsedTime * velocity);
+		    const start = {
+		        x: offset,
+		        y: music_board.height / 2
+		    }
 
-			const x = center.x + arcRadius * Math.cos(distance),
-				  y = center.y + arcRadius * Math.sin(distance);
+		    const end = {
+		        x: music_board.width - offset,
+		        y: music_board.height / 2
+		    }
 
-			// properties of board
-			board.strokeStyle = strokeColor;
-			board.lineWidth = 2;
+		    const center = {
+		        x: music_board.width / 2,
+		        y: music_board.height / 2
+		    }
 
-			// draw horizontal line
-			board.beginPath();
-			board.moveTo(start.x, start.y);
-			board.lineTo(end.x, end.y);
-			board.stroke();
+		    const base = {
+		        length: end.x - start.x,
+		        minAngle: 0,
+		        startAngle: 0,
+		        maxAngle: 2 * Math.PI
+		    }
 
-			// draw circle
-			// board.beginPath();
-			// board.arc(center.x, center.y, length * ((music_board.width)*10), Math.PI, Math.PI * 2);
-			// // for(let i = 1; i < 10; i++){
-			// //   board.arc(center.x, center.y, length * ((i/music_board.width)*10), Math.PI, Math.PI * 2);
-			// // }
-			// board.stroke();
+		    base.initialRadius = base.length * 0.05;
+		    base.circleRadius = base.length * 0.006;
+		    base.clearance = base.length * 0.03;
+		    base.spacing = (base.length - base.initialRadius - base.clearance) / 2 / colors.length;
 
-			const colors = Array(21).fill(strokeColor),
-				  initialArcRadius = length * 0.05;
-			let arcs = colors.map((color, index) => {
-				// const velocity = calculateVelocity(index) ;
-				return {
-					color
-				}
-			});
+		    // properties of board
+		    board.strokeStyle = strokeColor;
+		    board.lineWidth = 2;
 
-			arcs.forEach((arc, index) => {
-				const spacing = (length / 2 - initialArcRadius) / arcs.length;
-				const arcRadius = initialArcRadius + (index * spacing); 
+		    // draw horizontal line
+		    // board.beginPath();
+		    // board.moveTo(start.x, start.y);
+		    // board.lineTo(end.x, end.y);
+		    // board.stroke();
 
-				board.beginPath();
-				board.arc(center.x, center.y, arcRadius, 0, 2 * Math.PI);
-				board.strokeStyle = arc.color;
-				board.stroke();
-			});
+		    // Draw Arcs
+		    arcs.forEach((arc, index) => {
 
-			// draw point
-			// board.fillStyle = "white";
-			// board.beginPath();
-			// board.arc(x, y, length * 0.0065, 0, 2 * Math.PI);
-			// board.fill();
-			// board.stroke();
+		        const radius = base.initialRadius + (base.spacing * index);
+		        const offset = base.circleRadius * (5 / 3) / radius;
 
-			requestAnimationFrame(draw);
+		        // drawArc(center.x, center.y, arcRadius, 0, 2 * Math.PI);
+
+		        drawArc(center.x, center.y, radius, Math.PI + offset, (2 * Math.PI) - offset);
+		        drawArc(center.x, center.y, radius, offset, Math.PI - offset);
+
+		        board.globalAlpha = determineOpacity(0, 0, 0.15, 0.85, 1000);
+
+		    });
+
+		    requestAnimationFrame(draw);
 
 		}
-		
-		draw();
 
-		document.body.addEventListener("load", function () {
-		    audio.play();
-		})
+		draw();
 
 	</script>
 </body>
