@@ -8,6 +8,7 @@ html, body {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  touch-action: manipulation;
 }
 #music_board{
   position: absolute;
@@ -15,7 +16,6 @@ html, body {
   height: 100%;
   box-sizing: border-box;
   padding: 0;
-  touch-action: manipulation;
 }
 canvas {
   height: 100vh;
