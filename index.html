@@ -10,22 +10,51 @@
 
 	<!-- ************************* -->
 
-	<div id="sliders_container">
-	  <div class="volume">
-	    <p>Volume (<span>20</span>):</p>
-	    <input type="range" min="0" max="100" value="20" class="slider" id="rg_volume">
-	  </div>
-	</div>
+	<div class="container">
+		
+		<div id="sliders_container">
+			<div class="volume">
+				<p>Volume (<span>20</span>):</p>
+				<input type="range" min="0" max="100" value="20" class="slider" id="rg_volume">
+			</div>
+		</div>
 
-	<button id="sound-toggle" class="toggle" type="button" data-toggled="false" onClick="handleSoundToggle()" title="Toggle Pulse">
+		<!-- LOGO -->
+		<div class="logo">
+			<img src="assets/sonai_logo.png" alt="sonai logo">
+		</div>
+
+		<!-- <div class="playlist-cards">
+			<div class="card">
+				<img src="assets/tyler.jpg" alt="Card Image">
+				<h3>Foreword (feat. Rex Orange County)</h3>
+				<p>Tyler, The Creator</p>
+			</div>
+			<div class="card">
+				<img src="assets/sza.jpg" alt="Card Image">
+				<h3>Kill Bill</h3>
+				<p>SZA</p>
+			</div>
+			<div class="card">
+				<img src="assets/tame_impala.jpg" alt="Card Image">
+				<h3>The Less I Know The Better</h3>
+				<p>Tame Impala</p>
+			</div>
+		</div> -->
+		
+		<!-- INPUT -->
+		<div class="custom_input">
+			<input id="txt_prompt" type="text" placeholder="Descreva o tipo de playlist desejada..." />
+		</div>
+
+		<button id="sound-toggle" class="toggle" type="button" data-toggled="false" onClick="handleSoundToggle()" title="Toggle Pulse">
 			<i class="fa-solid fa-music-slash off"></i>
 			<i class="fa-solid fa-music on"></i>
-	    </button>
-	<div class="custom_input">
-		<input id="txt_prompt" type="text" placeholder="Descreva o tipo de playlist desejada..." />
-	</div>
+		</button>
 
-	<canvas id="music_board"></canvas>
+		<canvas id="music_board"></canvas>
+
+	</div>
 
 	<!-- ************************* -->
 
