@@ -360,12 +360,14 @@ body:has(#sound-toggle[data-toggled="true"]) #sound-message {
   pointer-events: none;
 }
 
-.chat-bubble,
-.chat-bubble::before{
+.chat-bubble{
   background:
     radial-gradient(circle at calc(55%) calc(100%), rgb(45, 34, 80) 0%, rgba(25, 0, 255, 0) var(--size)),
     radial-gradient(circle at calc(0%) calc(0%), rgb(67, 14, 92) 0%, rgba(255, 0, 242, 0) var(--size)),
     radial-gradient(circle at calc(100%) calc(0%), rgb(33, 20, 97) 0%, rgba(0,0,255,0) var(--size));
+}
+.chat-bubble::before{
+  background-color: rgb(68, 42, 103);
 }
 
 
